@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "938357056564",
+    "project_id": "billbro-d293e",
+    "storage_bucket": "billbro-d293e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938357056564:android:1f234243e80b20648bd661",
+        "android_client_info": {
+          "package_name": "com.example.billbro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzdUY3hM1M-YuGXe043fkPhYziTsUwS4g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
