@@ -4,13 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.billbro.data.entity.ExpenseEntity
 import com.example.billbro.data.entity.GroupEntity
+import com.example.billbro.data.repository.GroupSummaryRepository
 import com.example.billbro.databinding.ActivityGroupBinding
 import com.example.billbro.screens.adapter.GroupAdapter
 import com.example.billbro.viewmodel.GroupViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class GroupActivity : AppCompatActivity()  {
@@ -19,11 +25,21 @@ class GroupActivity : AppCompatActivity()  {
 
     private lateinit var adapter: GroupAdapter
 
+    @Inject
+    lateinit var summaryRepo: GroupSummaryRepository
+
+    private var summaryMap: Map<String, CharSequence> = emptyMap()
+
     private val currentUserId: String
         get() = com.google.firebase.auth.FirebaseAuth
             .getInstance()
             .currentUser?.uid
             ?: throw IllegalStateException("User not logged in")
+
+//    override fun onResume() {
+//        super.onResume()
+//        adapter.notifyDataSetChanged()
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +61,14 @@ class GroupActivity : AppCompatActivity()  {
 
         vm.getGroups(currentUserId).observe(this) {groups ->
             adapter.submit(groups)
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                summaryRepo.summaryFlow.collect { summaries ->
+                    adapter.updateSummaries(summaries)
+                }
+            }
         }
 
         binding.btnCreateGroup.setOnClickListener {

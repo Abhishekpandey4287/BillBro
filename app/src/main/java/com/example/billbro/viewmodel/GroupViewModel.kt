@@ -1,5 +1,6 @@
 package com.example.billbro.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.billbro.data.repository.GroupRepository
@@ -19,11 +20,22 @@ class GroupViewModel @Inject constructor(
             repo.createGroup(name, createdBy, members)
         }
     }
-
     fun deleteGroup(groupId: String) {
         viewModelScope.launch {
             repo.deleteGroup(groupId)
         }
     }
+
+    private val _groupSummaries =
+        androidx.lifecycle.MutableLiveData<Map<String, CharSequence>>()
+
+//    val groupSummaries: LiveData<Map<String, CharSequence>>
+//        get() = _groupSummaries
+//
+//    fun updateGroupSummary(groupId: String, summary: CharSequence) {
+//        val current = _groupSummaries.value?.toMutableMap() ?: mutableMapOf()
+//        current[groupId] = summary
+//        _groupSummaries.value = current
+//    }
 
 }

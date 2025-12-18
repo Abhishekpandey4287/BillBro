@@ -12,11 +12,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.billbro.R
 import com.example.billbro.data.entity.ExpenseEntity
+import com.example.billbro.data.repository.GroupSummaryRepository
 import com.example.billbro.databinding.ActivityMainBinding
 import com.example.billbro.screens.adapter.ExpenseAdapter
 import com.example.billbro.screens.dialog.AddExpenseDialogFragment
 import com.example.billbro.viewmodel.ExpenseViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -25,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: ExpenseViewModel by viewModels()
     private lateinit var adapter: ExpenseAdapter
+
+    @Inject
+    lateinit var summaryRepo: GroupSummaryRepository
 
     private var currentGroupId: String = ""
 
@@ -57,9 +62,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         adapter = ExpenseAdapter(
-            onExpenseClick = { expense ->
-                showExpenseDetails(expense)
-            },
             onDeleteClick = { expense ->
                 showDeleteExpenseDialog(expense)
             }
@@ -132,10 +134,13 @@ class MainActivity : AppCompatActivity() {
             summaryBuilder.append(displayText)
 
         }
-        com.example.billbro.utils.GroupSummaryStore.put(
-            currentGroupId,
-            summaryBuilder
-        )
+
+        summaryRepo.update(currentGroupId, summaryBuilder)
+
+//        com.example.billbro.utils.GroupSummaryStore.put(
+//            currentGroupId,
+//            summaryBuilder
+//        )
     }
 
     private fun createColoredAmountText(
@@ -203,15 +208,6 @@ class MainActivity : AppCompatActivity() {
     private fun showAddExpenseDialog() {
         AddExpenseDialogFragment.newInstance(currentGroupId)
             .show(supportFragmentManager, "add_expense")
-    }
-
-    private fun showExpenseDetails(expense: ExpenseEntity) {
-        // Navigate to expense detail screen
-        // TODO: Implement ExpenseDetailActivity
-        // val intent = Intent(this, ExpenseDetailActivity::class.java).apply {
-        //     putExtra("expense_id", expense.expenseId)a
-        // }
-        // startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -12,6 +12,7 @@ class GroupAdapter(
 ) : RecyclerView.Adapter<GroupAdapter.GroupViewHolder>() {
 
     private val groups = mutableListOf<GroupEntity>()
+    private var summaries: Map<String, CharSequence> = emptyMap()
 
     inner class GroupViewHolder(
         private val binding: ItemGroupBinding
@@ -20,10 +21,11 @@ class GroupAdapter(
         fun bind(group: GroupEntity) {
             binding.tvGroupName.text = group.groupName
 
-            val summary =
-                com.example.billbro.utils.GroupSummaryStore.get(group.groupId)
+//            val summary =
+//                com.example.billbro.utils.GroupSummaryStore.get(group.groupId)
 
-            binding.tvBalanceSummary.text = summary ?: "You are settled up"
+            binding.tvBalanceSummary.text =
+                summaries[group.groupId] ?: "You are settled up"
 
             binding.root.setOnClickListener {
                 onItemClick(group)
@@ -53,6 +55,11 @@ class GroupAdapter(
     fun submit(list: List<GroupEntity>) {
         groups.clear()
         groups.addAll(list)
+        notifyDataSetChanged()
+    }
+
+    fun updateSummaries(newSummaries: Map<String, CharSequence>) {
+        summaries = newSummaries
         notifyDataSetChanged()
     }
 }
