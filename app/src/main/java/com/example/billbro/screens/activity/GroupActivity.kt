@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.billbro.data.entity.ExpenseEntity
+import com.example.billbro.data.entity.GroupEntity
 import com.example.billbro.databinding.ActivityGroupBinding
 import com.example.billbro.screens.adapter.GroupAdapter
 import com.example.billbro.viewmodel.GroupViewModel
@@ -28,16 +30,23 @@ class GroupActivity : AppCompatActivity()  {
         binding = ActivityGroupBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val adapter = GroupAdapter { group ->
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("groupId", group.groupId)
-            startActivity(intent)
-        }
+        adapter = GroupAdapter(
+            onItemClick = { group ->
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("groupId", group.groupId)
+                startActivity(intent)
+            },
+            onDeleteClick = { group ->
+                showDeleteExpenseDialog(group)
+            }
+        )
         binding.groupRecycler.layoutManager = LinearLayoutManager(this)
         binding.groupRecycler.adapter = adapter
-        vm.getGroups(currentUserId).observe(this) {
-            adapter.submit(it)
+
+        vm.getGroups(currentUserId).observe(this) {groups ->
+            adapter.submit(groups)
         }
+
         binding.btnCreateGroup.setOnClickListener {
             val name = binding.etGroupName.text.toString().trim()
             if (name.isNotBlank()) {
@@ -49,5 +58,19 @@ class GroupActivity : AppCompatActivity()  {
                 binding.etGroupName.text.clear()
             }
         }
+    }
+
+    private fun showDeleteExpenseDialog(group: GroupEntity) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Delete expense")
+            .setMessage("Do you want to delete this Group?")
+            .setPositiveButton("Yes") { dialog, _ ->
+                vm.deleteGroup(group.groupId)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }

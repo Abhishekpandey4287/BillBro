@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
     private fun showDeleteExpenseDialog(expense: ExpenseEntity) {
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("Delete expense")
-            .setMessage("Do you want to delete this expense?")
+            .setMessage("Do you want to delete this Expense?")
             .setPositiveButton("Yes") { dialog, _ ->
                 viewModel.deleteExpense(expense.expenseId)
                 dialog.dismiss()
@@ -137,7 +137,6 @@ class MainActivity : AppCompatActivity() {
             summaryBuilder
         )
     }
-
 
     private fun createColoredAmountText(
         raw: String,

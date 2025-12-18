@@ -4,7 +4,7 @@ import androidx.room.*
 import com.example.billbro.data.entity.UserEntity
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUser(user: UserEntity)
     @Query("SELECT * FROM users WHERE userId = :userId")
     suspend fun getUser(userId: String): UserEntity?

@@ -1,5 +1,6 @@
 package com.example.billbro.data.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.billbro.data.dto.UserDao
 import com.example.billbro.data.dto.GroupDao
@@ -25,6 +26,7 @@ class GroupRepository @Inject constructor(
         requireNotNull(createdBy) { "createdBy cannot be null" }
 
         val groupId = UUID.randomUUID().toString()
+        Log.d("GROUP_CREATE", "New groupId = $groupId")
 
         userDao.insertUser(
             UserEntity(

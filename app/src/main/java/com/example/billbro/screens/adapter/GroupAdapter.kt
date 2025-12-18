@@ -7,7 +7,8 @@ import com.example.billbro.data.entity.GroupEntity
 import com.example.billbro.databinding.ItemGroupBinding
 
 class GroupAdapter(
-    private val onItemClick: (GroupEntity) -> Unit
+    private val onItemClick: (GroupEntity) -> Unit,
+    private val onDeleteClick: (GroupEntity) -> Unit
 ) : RecyclerView.Adapter<GroupAdapter.GroupViewHolder>() {
 
     private val groups = mutableListOf<GroupEntity>()
@@ -26,6 +27,10 @@ class GroupAdapter(
 
             binding.root.setOnClickListener {
                 onItemClick(group)
+            }
+
+            binding.ivMore.setOnClickListener {
+                onDeleteClick(group)
             }
         }
     }
