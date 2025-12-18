@@ -11,7 +11,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class ExpenseAdapter(
-    private val onExpenseClick: (ExpenseEntity) -> Unit
+    private val onExpenseClick: (ExpenseEntity) -> Unit,
+    private val onDeleteClick: (ExpenseEntity) -> Unit
 ) : ListAdapter<ExpenseEntity, ExpenseAdapter.ExpenseViewHolder>(ExpenseDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExpenseViewHolder {
@@ -41,6 +42,9 @@ class ExpenseAdapter(
                 tvDate.text = dateFormat.format(Date(expense.date))
                 root.setOnClickListener {
                     onExpenseClick(expense)
+                }
+                ivMore.setOnClickListener {
+                    onDeleteClick(expense)
                 }
             }
         }
