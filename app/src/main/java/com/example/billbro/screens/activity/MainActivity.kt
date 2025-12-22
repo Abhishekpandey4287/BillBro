@@ -136,11 +136,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         summaryRepo.update(currentGroupId, summaryBuilder)
-
-//        com.example.billbro.utils.GroupSummaryStore.put(
-//            currentGroupId,
-//            summaryBuilder
-//        )
     }
 
     private fun createColoredAmountText(
@@ -169,36 +164,53 @@ class MainActivity : AppCompatActivity() {
         return spannable
     }
 
-    private fun calculateBalances(expenses: List<ExpenseEntity>): Map<String, Double> {
+    private fun calculateBalances(
+        expenses: List<ExpenseEntity>
+    ): Map<String, Double> {
+
         if (expenses.isEmpty()) return emptyMap()
 
-        val users = expenses
-            .flatMap { listOf(it.paidBy) }
-            .distinct()
-
-        val balanceMap = mutableMapOf<String, Double>()
-
-        users.forEach { balanceMap[it] = 0.0 }
+        val nameMap = mutableMapOf<String, String>()
 
         expenses.forEach { expense ->
-            val splitCount = users.size
+            val key = normalizeName(expense.paidBy)
+            nameMap.putIfAbsent(key, expense.paidBy)
+        }
+
+        val balanceMap = mutableMapOf<String, Double>()
+        nameMap.keys.forEach { balanceMap[it] = 0.0 }
+
+        expenses.forEach { expense ->
+            val paidByKey = normalizeName(expense.paidBy)
+            val splitCount = nameMap.size
             if (splitCount == 0) return@forEach
 
             val share = expense.amount / splitCount
 
-            balanceMap[expense.paidBy] =
-                balanceMap.getValue(expense.paidBy) + (expense.amount - share)
+            balanceMap[paidByKey] =
+                balanceMap.getValue(paidByKey) + (expense.amount - share)
 
-            users.forEach { user ->
-                if (user != expense.paidBy) {
-                    balanceMap[user] =
-                        balanceMap.getValue(user) - share
+            nameMap.keys.forEach { userKey ->
+                if (userKey != paidByKey) {
+                    balanceMap[userKey] =
+                        balanceMap.getValue(userKey) - share
                 }
             }
         }
 
-        return balanceMap
+        return balanceMap.mapKeys { (key, _) ->
+            nameMap[key] ?: key
+        }
     }
+
+    private fun normalizeName(name: String): String {
+        return name
+            .trim()
+            .lowercase(java.util.Locale.ROOT)
+            .split(Regex("\\s+"))
+            .joinToString(" ")
+    }
+
     private fun setupClickListeners() {
         binding.btnAdd.setOnClickListener {
             showAddExpenseDialog()

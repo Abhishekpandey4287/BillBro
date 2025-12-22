@@ -37,13 +37,24 @@ class ExpenseAdapter(
             binding.apply {
                 tvAmount.text = "₹${expense.amount}"
                 tvDescription.text = expense.description
-                tvPaidBy.text = "Paid by: ${expense.paidBy}"
+                tvPaidBy.text = "Paid by: ${formatName(expense.paidBy)}"
                 tvDate.text = dateFormat.format(Date(expense.date))
 
                 ivMore.setOnClickListener {
                     onDeleteClick(expense)
                 }
             }
+        }
+
+        private fun formatName(name: String): String {
+            return name
+                .trim()
+                .split(Regex("\\s+"))
+                .joinToString(" ") {
+                    it.lowercase().replaceFirstChar { c ->
+                        if (c.isLowerCase()) c.titlecase() else c.toString()
+                    }
+                }
         }
     }
 
