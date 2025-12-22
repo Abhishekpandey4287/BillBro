@@ -3,6 +3,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.billbro.data.dto.ExpenseDao
 import com.example.billbro.data.dto.GroupDao
 import com.example.billbro.data.dto.GroupMemberDao
@@ -22,6 +23,7 @@ import com.example.billbro.data.entity.*
     version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun expenseDao(): ExpenseDao
     abstract fun splitDao(): SplitDao

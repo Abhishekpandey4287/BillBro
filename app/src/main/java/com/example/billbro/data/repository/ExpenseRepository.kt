@@ -4,6 +4,7 @@ import com.example.billbro.data.dto.ExpenseDao
 import com.example.billbro.data.dto.GroupMemberDao
 import com.example.billbro.data.dto.SplitDao
 import com.example.billbro.data.entity.ExpenseEntity
+import com.example.billbro.data.entity.UserBalance
 import com.example.billbro.utils.SplitCalculator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -17,6 +18,7 @@ class ExpenseRepository @Inject constructor(
 
     suspend fun addExpenseWithSplit(
         expense: ExpenseEntity,
+        splitBetween: List<String> = emptyList(),
         splitType: SplitType = SplitType.EQUAL
     ) {
         val memberIds = groupMemberDao.getGroupMemberIds(expense.groupId)
@@ -32,15 +34,21 @@ class ExpenseRepository @Inject constructor(
             SplitType.PERCENTAGE -> emptyList()
             SplitType.EXACT -> emptyList()
             SplitType.SHARE -> emptyList()
+            SplitType.BETWEEN -> SplitCalculator.calculateBetweenSplits(
+                expenseId = expense.expenseId,
+                amount = expense.amount,
+                paidBy = expense.paidBy,
+                splitBetween = splitBetween
+            )
         }
 
         expenseDao.insertExpense(expense)
         splitDao.insertSplits(splits)
     }
 
-//    fun getExpensesOnce(groupId: String): Flow<List<ExpenseEntity>> {
-//        return expenseDao.getExpensesFlow(groupId)
-//    }
+    fun getGroupBalances(groupId: String): Flow<List<UserBalance>> {
+        return splitDao.getGroupBalancesFlow(groupId)
+    }
 
     fun getExpenses(groupId: String): Flow<List<ExpenseEntity>> {
         return expenseDao.getExpensesFlow(groupId)
@@ -84,5 +92,5 @@ class ExpenseRepository @Inject constructor(
 }
 
 enum class SplitType {
-    EQUAL, PERCENTAGE, EXACT, SHARE
+    EQUAL, PERCENTAGE, EXACT, SHARE , BETWEEN
 }

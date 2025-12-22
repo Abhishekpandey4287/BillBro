@@ -11,21 +11,6 @@ data class ExpenseEntity(
     val amount: Double,
     val paidBy: String,
     val description: String,
-    val date : Long = System.currentTimeMillis()
-){
-    @Ignore
-    constructor(
-        expenseId: String,
-        groupId: String,
-        amount: Double,
-        paidBy: String,
-        description: String
-    ) : this(
-        expenseId,
-        groupId,
-        amount,
-        paidBy,
-        description,
-        System.currentTimeMillis()
-    )
-}
+    val date: Long = System.currentTimeMillis(),
+    val splitBetween: List<String>
+)

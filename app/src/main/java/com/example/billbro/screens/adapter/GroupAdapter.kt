@@ -21,9 +21,6 @@ class GroupAdapter(
         fun bind(group: GroupEntity) {
             binding.tvGroupName.text = group.groupName
 
-//            val summary =
-//                com.example.billbro.utils.GroupSummaryStore.get(group.groupId)
-
             binding.tvBalanceSummary.text =
                 summaries[group.groupId] ?: "You are settled up"
 

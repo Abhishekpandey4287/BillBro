@@ -6,7 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import com.example.billbro.data.entity.MemberUI
+import com.example.billbro.data.repository.SplitType
 import com.example.billbro.databinding.DialogAddExpenseBinding
+import com.example.billbro.screens.adapter.NameCheckboxAdapter
 import com.example.billbro.viewmodel.ExpenseViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,6 +20,10 @@ class AddExpenseDialogFragment : DialogFragment() {
     private val binding get() = _binding!!
     private val viewModel: ExpenseViewModel by activityViewModels()
     private var groupId: String = ""
+    private var availableNames: List<String> = emptyList()
+
+    private lateinit var dropdownAdapter: NameCheckboxAdapter
+    private val memberList = mutableListOf<MemberUI>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = LayoutInflater.from(requireContext())
@@ -24,14 +31,66 @@ class AddExpenseDialogFragment : DialogFragment() {
 
         arguments?.let {
             groupId = it.getString("group_id") ?: ""
+            availableNames = it.getStringArrayList("available_names") ?: emptyList()
         }
 
+        setupDropdown()
         setupClickListeners()
 
         return AlertDialog.Builder(requireContext())
             .setView(binding.root)
             .setTitle("Add Expense")
             .create()
+    }
+
+    private fun setupDropdown() {
+        if (availableNames.isEmpty()) {
+            binding.tilSplitBetween.visibility = android.view.View.GONE
+            return
+        }
+
+        memberList.clear()
+        memberList.addAll(availableNames.map { MemberUI(it, true) })
+
+        updateSelectedText()
+
+        binding.etSplitBetween.setOnClickListener {
+            showSplitBetweenDialog()
+        }
+    }
+
+    private fun showSplitBetweenDialog() {
+        dropdownAdapter = NameCheckboxAdapter { position, isChecked ->
+            memberList[position] = memberList[position].copy(isSelected = isChecked)
+        }
+
+        dropdownAdapter.submitList(memberList.toList())
+
+        val recyclerView = androidx.recyclerview.widget.RecyclerView(requireContext()).apply {
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+            this.adapter = dropdownAdapter
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Split Between")
+            .setView(recyclerView)
+            .setPositiveButton("Done") { _, _ ->
+                updateSelectedText()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateSelectedText() {
+        val selected = memberList.filter { it.isSelected }.map { it.name }
+
+        binding.etSplitBetween.setText(
+            when {
+                selected.isEmpty() -> "Split equally"
+                selected.size == memberList.size -> "Split equally"
+                else -> selected.joinToString(",")
+            }
+        )
     }
 
     private fun setupClickListeners() {
@@ -48,6 +107,7 @@ class AddExpenseDialogFragment : DialogFragment() {
         val amount = binding.etAmount.text?.toString()?.toDoubleOrNull()
         val description = binding.etDescription.text?.toString().orEmpty()
         val paidBy = binding.etPaidBy.text?.toString().orEmpty()
+//        val splitBetweenText = binding.etSplitBetween.text?.toString().orEmpty()
 
         binding.etAmount.error = null
         binding.etDescription.error = null
@@ -68,11 +128,32 @@ class AddExpenseDialogFragment : DialogFragment() {
             }
         }
 
+        val selectedMembers =
+            memberList.filter { it.isSelected }.map { it.name }
+
+        val splitType =
+            if (selectedMembers.isNotEmpty() &&
+                selectedMembers.size < memberList.size
+            ) {
+                SplitType.BETWEEN
+            } else {
+                SplitType.EQUAL
+            }
+
+        val effectiveSplitBetween =
+            if (splitType == SplitType.BETWEEN) {
+                selectedMembers.filter { it != paidBy }
+            } else {
+                emptyList()
+            }
+
         viewModel.addExpense(
             groupId = groupId,
             amount = amount,
             paidBy = paidBy,
-            description = description
+            description = description,
+            splitBetween = effectiveSplitBetween,
+            splitType = splitType
         )
 
         dismiss()
@@ -84,10 +165,11 @@ class AddExpenseDialogFragment : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(groupId: String): AddExpenseDialogFragment {
+        fun newInstance(groupId: String,  availableNames: List<String>): AddExpenseDialogFragment {
             return AddExpenseDialogFragment().apply {
                 arguments = Bundle().apply {
                     putString("group_id", groupId)
+                    putStringArrayList("available_names", ArrayList(availableNames))
                 }
             }
         }

@@ -62,6 +62,67 @@ object SplitCalculator {
         return splits
     }
 
+    fun calculateBetweenSplits(
+        expenseId: String,
+        amount: Double,
+        paidBy: String,
+        splitBetween: List<String>
+    ): List<SplitEntity> {
+
+        if (splitBetween.isEmpty()) return emptyList()
+
+        val participants =
+            (splitBetween + paidBy)
+                .map { normalizeName(it) }
+                .distinct()
+
+        val participantList = participants.toList()
+        val size = participantList.size
+        if (size == 0) return emptyList()
+
+        val share = (amount * 100 / size).roundToInt() / 100.0
+        var totalDistributed = 0.0
+
+        val splits = mutableListOf<SplitEntity>()
+
+        participantList.forEachIndexed { index, user ->
+            val userShare =
+                if (index == participantList.lastIndex) {
+                    amount - totalDistributed
+                } else {
+                    share
+                }
+
+            val balance =
+                if (user == paidBy) {
+                    amount - userShare
+                } else {
+                    -userShare
+                }
+
+            splits.add(
+                SplitEntity(
+                    expenseId = expenseId,
+                    userId = user,
+                    balance = balance
+                )
+            )
+
+            totalDistributed += userShare
+        }
+
+        return splits
+    }
+
+    private fun normalizeName(name: String): String {
+        return name
+            .trim()
+            .lowercase(java.util.Locale.ROOT)
+            .split(Regex("\\s+"))
+            .joinToString(" ")
+    }
+
+
     fun calculatePercentageSplits(
         expenseId: String,
         amount: Double,

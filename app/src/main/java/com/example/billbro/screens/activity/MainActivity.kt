@@ -52,12 +52,6 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.loadBalance(currentGroupId, currentUserId)
         viewModel.loadExpenses(currentGroupId)
-
-        binding.btnAdd.setOnClickListener {
-            AddExpenseDialogFragment
-                .newInstance(currentGroupId)
-                .show(supportFragmentManager, "add_expense")
-        }
     }
 
     private fun setupRecyclerView() {
@@ -218,7 +212,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAddExpenseDialog() {
-        AddExpenseDialogFragment.newInstance(currentGroupId)
+        val uniqueNames = viewModel.expenses.value
+            .map { it.paidBy }
+            .distinct()
+            .sorted()
+
+        AddExpenseDialogFragment.newInstance(currentGroupId, uniqueNames)
             .show(supportFragmentManager, "add_expense")
     }
 

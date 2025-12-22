@@ -5,6 +5,7 @@ import androidx.room.*
 import com.example.billbro.data.entity.BalanceResult
 import com.example.billbro.data.entity.SplitEntity
 import com.example.billbro.data.entity.UserBalance
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SplitDao {
@@ -45,6 +46,15 @@ interface SplitDao {
         WHERE e.groupId = :groupId AND s.userId = :userId
     """)
     suspend fun getUserBalanceInGroup(groupId: String, userId: String): BalanceResult?
+
+    @Query("""
+    SELECT s.userId, SUM(s.balance) as total 
+    FROM splits s
+    JOIN expenses e ON s.expenseId = e.expenseId
+    WHERE e.groupId = :groupId
+    GROUP BY s.userId
+""")
+    fun getGroupBalancesFlow(groupId: String): Flow<List<UserBalance>>
 
     @Query("DELETE FROM splits WHERE expenseId = :expenseId")
     suspend fun deleteSplitsForExpense(expenseId: String)

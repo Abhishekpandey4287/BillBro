@@ -2,14 +2,18 @@ package com.example.billbro.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.billbro.data.dto.GroupMemberDao
 import com.example.billbro.data.entity.ExpenseEntity
+import com.example.billbro.data.entity.UserBalance
 import com.example.billbro.data.repository.ExpenseRepository
 import com.example.billbro.data.repository.SplitType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -53,6 +57,7 @@ class ExpenseViewModel @Inject constructor(
         amount: Double,
         paidBy: String,
         description: String,
+        splitBetween: List<String> = emptyList(),
         splitType: SplitType = SplitType.EQUAL
     ) {
         viewModelScope.launch {
@@ -62,10 +67,11 @@ class ExpenseViewModel @Inject constructor(
                 amount = amount,
                 paidBy = paidBy,
                 description = description,
-                date = System.currentTimeMillis()
+                date = System.currentTimeMillis(),
+                splitBetween = splitBetween
             )
 
-            expenseRepository.addExpenseWithSplit(expense, splitType)
+            expenseRepository.addExpenseWithSplit(expense,splitBetween, splitType)
         }
     }
 
