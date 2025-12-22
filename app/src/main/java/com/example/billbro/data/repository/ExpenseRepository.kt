@@ -38,6 +38,10 @@ class ExpenseRepository @Inject constructor(
         splitDao.insertSplits(splits)
     }
 
+//    fun getExpensesOnce(groupId: String): Flow<List<ExpenseEntity>> {
+//        return expenseDao.getExpensesFlow(groupId)
+//    }
+
     fun getExpenses(groupId: String): Flow<List<ExpenseEntity>> {
         return expenseDao.getExpensesFlow(groupId)
     }
