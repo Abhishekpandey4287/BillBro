@@ -73,7 +73,7 @@ object SplitCalculator {
 
         val participants =
             (splitBetween + paidBy)
-                .map { normalizeName(it) }
+                .map { NameNormalizer.normalize(it) }
                 .distinct()
 
         val participantList = participants.toList()
@@ -112,14 +112,6 @@ object SplitCalculator {
         }
 
         return splits
-    }
-
-    private fun normalizeName(name: String): String {
-        return name
-            .trim()
-            .lowercase(java.util.Locale.ROOT)
-            .split(Regex("\\s+"))
-            .joinToString(" ")
     }
 
 

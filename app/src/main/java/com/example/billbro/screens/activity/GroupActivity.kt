@@ -14,6 +14,7 @@ import com.example.billbro.data.repository.ExpenseRepository
 import com.example.billbro.data.repository.GroupSummaryRepository
 import com.example.billbro.databinding.ActivityGroupBinding
 import com.example.billbro.screens.adapter.GroupAdapter
+import com.example.billbro.utils.NameNormalizer
 import com.example.billbro.viewmodel.GroupViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
@@ -171,7 +172,7 @@ class GroupActivity : AppCompatActivity()  {
         val nameMap = mutableMapOf<String, String>()
 
         expenses.forEach { expense ->
-            val key = normalizeName(expense.paidBy)
+            val key = NameNormalizer.normalize(expense.paidBy)
             nameMap.putIfAbsent(key, expense.paidBy)
         }
 
@@ -179,7 +180,7 @@ class GroupActivity : AppCompatActivity()  {
         nameMap.keys.forEach { balanceMap[it] = 0.0 }
 
         expenses.forEach { expense ->
-            val paidByKey = normalizeName(expense.paidBy)
+            val paidByKey = NameNormalizer.normalize(expense.paidBy)
             val splitCount = nameMap.size
             if (splitCount == 0) return@forEach
 
@@ -199,14 +200,6 @@ class GroupActivity : AppCompatActivity()  {
         return balanceMap.mapKeys { (key, _) ->
             nameMap[key] ?: key
         }
-    }
-
-    private fun normalizeName(name: String): String {
-        return name
-            .trim()
-            .lowercase(java.util.Locale.ROOT)
-            .split(Regex("\\s+"))
-            .joinToString(" ")
     }
 
     private fun showDeleteExpenseDialog(group: GroupEntity) {

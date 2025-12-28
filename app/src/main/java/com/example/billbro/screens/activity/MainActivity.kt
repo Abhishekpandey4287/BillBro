@@ -16,6 +16,7 @@ import com.example.billbro.data.repository.GroupSummaryRepository
 import com.example.billbro.databinding.ActivityMainBinding
 import com.example.billbro.screens.adapter.ExpenseAdapter
 import com.example.billbro.screens.dialog.AddExpenseDialogFragment
+import com.example.billbro.utils.NameNormalizer
 import com.example.billbro.viewmodel.ExpenseViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
@@ -167,7 +168,7 @@ class MainActivity : AppCompatActivity() {
         val nameMap = mutableMapOf<String, String>()
 
         expenses.forEach { expense ->
-            val key = normalizeName(expense.paidBy)
+            val key = NameNormalizer.normalize(expense.paidBy)
             nameMap.putIfAbsent(key, expense.paidBy)
         }
 
@@ -175,7 +176,7 @@ class MainActivity : AppCompatActivity() {
         nameMap.keys.forEach { balanceMap[it] = 0.0 }
 
         expenses.forEach { expense ->
-            val paidByKey = normalizeName(expense.paidBy)
+            val paidByKey = NameNormalizer.normalize(expense.paidBy)
             val splitCount = nameMap.size
             if (splitCount == 0) return@forEach
 
@@ -195,14 +196,6 @@ class MainActivity : AppCompatActivity() {
         return balanceMap.mapKeys { (key, _) ->
             nameMap[key] ?: key
         }
-    }
-
-    private fun normalizeName(name: String): String {
-        return name
-            .trim()
-            .lowercase(java.util.Locale.ROOT)
-            .split(Regex("\\s+"))
-            .joinToString(" ")
     }
 
     private fun setupClickListeners() {
